@@ -1,0 +1,44 @@
+﻿# ClawBY19 Auto-Generated
+
+# IDE and editor files
+.vs/
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build outputs
+bin/
+obj/
+publish/
+[Bb]uild/
+[Tt]arget/
+
+# Debug files
+*.pdb
+*.log
+*.cache
+
+# Environment files
+.env
+*.sample
+
+# Database files
+*.db
+*.db-shm
+*.db-wal
+
+# Compiled resources
+*.resources
+
+# Application specific
+.claude/
+*.Up2Date
+*.lref
+
+# Project files (keep only source code and config files)
+# Note: .csproj, .sln, .props, .targets, .editorconfig are kept
+
+# Keep all source files: .cs, .xaml, .json, .toml, .ico, .baml, .txt, .md

@@ -1,0 +1,210 @@
+# config/model_pricing.toml — 模型收费标准
+# 单位：元/百万Token，currency = CNY
+# last_updated = "2026-04-01"
+
+# ── 中国开源模型（API调用计费）──
+[deepseek-v3]
+provider = "深度求索"
+input_price_per_million  = 1.0
+output_price_per_million = 2.0
+cache_hit_price_per_million = 0.1
+currency = "CNY"
+
+[deepseek-r1]
+provider = "深度求索"
+input_price_per_million  = 4.0
+output_price_per_million = 16.0
+currency = "CNY"
+
+[qwen3-235b]
+provider = "阿里云百炼"
+input_price_per_million  = 5.0
+output_price_per_million = 15.0
+currency = "CNY"
+
+[qwen2.5-72b]
+provider = "阿里云百炼"
+input_price_per_million  = 4.0
+output_price_per_million = 12.0
+currency = "CNY"
+
+[qwq-32b]
+provider = "阿里云百炼"
+input_price_per_million  = 2.0
+output_price_per_million = 8.0
+currency = "CNY"
+
+[qwen2.5-coder-32b]
+provider = "阿里云百炼"
+input_price_per_million  = 3.5
+output_price_per_million = 7.0
+currency = "CNY"
+
+# ── 中国商业API ──
+[qwen-max]
+provider = "阿里云百炼"
+input_price_per_million  = 20.0
+output_price_per_million = 60.0
+currency = "CNY"
+
+[qwen-plus]
+provider = "阿里云百炼"
+input_price_per_million  = 4.0
+output_price_per_million = 12.0
+currency = "CNY"
+
+[qwen-turbo]
+provider = "阿里云百炼"
+input_price_per_million  = 0.3
+output_price_per_million = 0.6
+currency = "CNY"
+
+[glm-4-plus]
+provider = "智谱AI"
+input_price_per_million  = 20.0
+output_price_per_million = 20.0
+currency = "CNY"
+
+[glm-z1-flash]
+provider = "智谱AI"
+input_price_per_million  = 10.0
+output_price_per_million = 10.0
+currency = "CNY"
+
+[moonshot-v1-128k]
+provider = "月之暗面"
+input_price_per_million  = 12.0
+output_price_per_million = 12.0
+currency = "CNY"
+
+[minimax-text-01]
+provider = "MiniMax"
+input_price_per_million  = 1.0
+output_price_per_million = 8.0
+currency = "CNY"
+
+[spark4.0-ultra]
+provider = "科大讯飞"
+input_price_per_million  = 30.0
+output_price_per_million = 30.0
+currency = "CNY"
+
+[ernie-4.5]
+provider = "百度文心"
+input_price_per_million  = 4.0
+output_price_per_million = 8.0
+currency = "CNY"
+
+[doubao-pro-32k]
+provider = "字节豆包"
+input_price_per_million  = 0.8
+output_price_per_million = 2.0
+currency = "CNY"
+
+[hunyuan-turbo]
+provider = "腾讯混元"
+input_price_per_million  = 14.9
+output_price_per_million = 49.0
+currency = "CNY"
+
+[baichuan4-turbo]
+provider = "百川智能"
+input_price_per_million  = 15.0
+output_price_per_million = 15.0
+currency = "CNY"
+
+# ── 美国主流模型 ──
+[claude-sonnet-4-6]
+provider = "Anthropic"
+input_price_per_million  = 21.0
+output_price_per_million = 105.0
+currency = "CNY"
+exchange_rate = 7.0
+
+[claude-opus-4-6]
+provider = "Anthropic"
+input_price_per_million  = 105.0
+output_price_per_million = 525.0
+currency = "CNY"
+exchange_rate = 7.0
+
+[claude-haiku-4-5]
+provider = "Anthropic"
+input_price_per_million  = 2.1
+output_price_per_million = 10.5
+currency = "CNY"
+exchange_rate = 7.0
+
+[gpt-4o]
+provider = "OpenAI"
+input_price_per_million  = 17.5
+output_price_per_million = 52.5
+currency = "CNY"
+exchange_rate = 7.0
+
+[o3]
+provider = "OpenAI"
+input_price_per_million  = 140.0
+output_price_per_million = 560.0
+currency = "CNY"
+exchange_rate = 7.0
+
+[o4-mini]
+provider = "OpenAI"
+input_price_per_million  = 7.7
+output_price_per_million = 31.0
+currency = "CNY"
+exchange_rate = 7.0
+
+[gemini-2.5-pro]
+provider = "Google"
+input_price_per_million  = 25.0
+output_price_per_million = 105.0
+currency = "CNY"
+exchange_rate = 7.0
+
+[gemini-2.0-flash]
+provider = "Google"
+input_price_per_million  = 1.4
+output_price_per_million = 4.2
+currency = "CNY"
+exchange_rate = 7.0
+
+[grok-3]
+provider = "xAI"
+input_price_per_million  = 35.0
+output_price_per_million = 105.0
+currency = "CNY"
+exchange_rate = 7.0
+
+[mistral-large-3]
+provider = "Mistral AI"
+input_price_per_million  = 14.0
+output_price_per_million = 42.0
+currency = "CNY"
+exchange_rate = 7.0
+
+# ── 本地Ollama（零费用）──
+[ollama/deepseek-r1:8b]
+provider = "本地Ollama"
+input_price_per_million  = 0.0
+output_price_per_million = 0.0
+currency = "CNY"
+
+[ollama/deepseek-r1:1.5b]
+provider = "本地Ollama"
+input_price_per_million  = 0.0
+output_price_per_million = 0.0
+currency = "CNY"
+
+[ollama/qwen2.5:7b]
+provider = "本地Ollama"
+input_price_per_million  = 0.0
+output_price_per_million = 0.0
+currency = "CNY"
+
+[ollama/qwen2.5-coder:7b]
+provider = "本地Ollama"
+input_price_per_million  = 0.0
+output_price_per_million = 0.0
+currency = "CNY"

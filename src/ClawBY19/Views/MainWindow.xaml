@@ -1,0 +1,190 @@
+<Window x:Class="ClawBY19.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:ClawBY19.ViewModels"
+        xmlns:views="clr-namespace:ClawBY19.Views"
+        Title="ClawBY19 v2.0"
+        Icon="/Resources/lobster.ico"
+        Height="760" Width="1100" MinHeight="600" MinWidth="800"
+        Background="{DynamicResource BgDarkBrush}"
+        WindowStartupLocation="CenterScreen"
+        FontFamily="Microsoft YaHei UI, Segoe UI">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>  <!-- 费用预警条 -->
+            <RowDefinition Height="*"/>     <!-- 主体：左右分栏 -->
+        </Grid.RowDefinitions>
+
+        <!-- ── 费用预警条 ── -->
+        <Border Grid.Row="0"
+                Background="{Binding Console.AlertLevel, Converter={StaticResource AlertToBrush}}"
+                Visibility="{Binding Console.IsAlertVisible, Converter={StaticResource BoolToVis}}"
+                Padding="12,6">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0"
+                           Text="{Binding Console.AlertMessage}"
+                           Foreground="White" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                <Button Grid.Column="1" Content="✕" Style="{StaticResource NavButton}"
+                        Command="{Binding Console.DismissAlertCommand}"
+                        Foreground="White" FontSize="12"/>
+            </Grid>
+        </Border>
+
+        <!-- ── 主体：左右分栏 ── -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="180" MinWidth="120" MaxWidth="300"/>
+                <ColumnDefinition Width="4"/>    <!-- GridSplitter -->
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- ══════ 左侧菜单面板 ══════ -->
+            <Border Grid.Column="0" Background="{DynamicResource BgPanelBrush}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>  <!-- Logo -->
+                        <RowDefinition Height="*"/>     <!-- 菜单项 -->
+                        <RowDefinition Height="Auto"/>  <!-- 底部：当前模型 + 主题名 -->
+                    </Grid.RowDefinitions>
+
+                    <!-- Logo -->
+                    <Border Grid.Row="0" Padding="16,18,16,14"
+                            BorderBrush="{DynamicResource BgCardBrush}" BorderThickness="0,0,0,1">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="🦞" FontSize="24" Margin="0,0,8,0"/>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="ClawBY19" FontSize="15" FontWeight="Bold"
+                                           Foreground="{DynamicResource AccentBlueBrush}"/>
+                                <TextBlock Text="v2.0" FontSize="10"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- 导航菜单 -->
+                    <StackPanel Grid.Row="1" Margin="8,12,8,0">
+                        <!-- 聊天 -->
+                        <Button Margin="0,2">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource SideNavButton}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ActiveView}" Value="Chat">
+                                            <Setter Property="Background" Value="{DynamicResource BgCardBrush}"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource AccentBlueBrush}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                            <Button.Command><Binding Path="ShowChatCommand"/></Button.Command>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="💬" FontSize="15" Margin="0,0,10,0"/>
+                                <TextBlock Text="聊天" FontSize="13" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                        <!-- AI控制台 -->
+                        <Button Margin="0,2">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource SideNavButton}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ActiveView}" Value="Console">
+                                            <Setter Property="Background" Value="{DynamicResource BgCardBrush}"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource AccentBlueBrush}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                            <Button.Command><Binding Path="ShowConsoleCommand"/></Button.Command>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="📊" FontSize="15" Margin="0,0,10,0"/>
+                                <TextBlock Text="AI控制台" FontSize="13" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                        <!-- 任务 -->
+                        <Button Margin="0,2">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource SideNavButton}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ActiveView}" Value="Tasks">
+                                            <Setter Property="Background" Value="{DynamicResource BgCardBrush}"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource AccentBlueBrush}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                            <Button.Command><Binding Path="ShowTasksCommand"/></Button.Command>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="📋" FontSize="15" Margin="0,0,10,0"/>
+                                <TextBlock Text="任务" FontSize="13" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                        <!-- 设置 -->
+                        <Button Margin="0,2">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource SideNavButton}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ActiveView}" Value="Settings">
+                                            <Setter Property="Background" Value="{DynamicResource BgCardBrush}"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource AccentBlueBrush}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                            <Button.Command><Binding Path="ShowSettingsCommand"/></Button.Command>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="⚙️" FontSize="15" Margin="0,0,10,0"/>
+                                <TextBlock Text="设置" FontSize="13" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+
+                    <!-- 底部：当前模型 + 主题名 -->
+                    <Border Grid.Row="2" Padding="12,10"
+                            BorderBrush="{DynamicResource BgCardBrush}" BorderThickness="0,1,0,0">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                <Ellipse Width="7" Height="7" Fill="{DynamicResource AccentGreenBrush}"
+                                         Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding Chat.CurrentModelDisplay}"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           FontSize="11" TextTrimming="CharacterEllipsis"/>
+                            </StackPanel>
+                            <TextBlock Text="{Binding CurrentThemeName}"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                       FontSize="10" Opacity="0.6"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <!-- GridSplitter -->
+            <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Stretch"
+                          Background="{DynamicResource BgCardBrush}" Cursor="SizeWE"/>
+
+            <!-- ══════ 右侧内容区 ══════ -->
+            <ContentControl Grid.Column="2" Content="{Binding ActiveViewModel}">
+                <ContentControl.Resources>
+                    <DataTemplate DataType="{x:Type vm:ChatViewModel}">
+                        <views:ChatView/>
+                    </DataTemplate>
+                    <DataTemplate DataType="{x:Type vm:ConsoleViewModel}">
+                        <views:ConsoleView/>
+                    </DataTemplate>
+                    <DataTemplate DataType="{x:Type vm:TasksViewModel}">
+                        <views:TasksView/>
+                    </DataTemplate>
+                    <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
+                        <views:SettingsView/>
+                    </DataTemplate>
+                </ContentControl.Resources>
+            </ContentControl>
+        </Grid>
+    </Grid>
+</Window>

@@ -1,0 +1,40 @@
+# config/models.toml — 模型选择模式配置
+# ClawBY19 V2.0
+
+# =======================================================
+# 模式开关
+#   user_specified  →  {指定模型}：全局固定使用 specified_model
+#   claw_auto       →  {Claw自选}：根据任务类型自动路由
+# =======================================================
+[model_selection]
+mode = "claw_auto"
+specified_model = "deepseek-v3"
+allow_per_session_override = true
+
+# =======================================================
+# Claw自选模式配置
+# =======================================================
+[claw_auto]
+default_model = "deepseek-v3"
+explain_selection = true
+
+[claw_auto.task_routing]
+code_task          = "deepseek-v3"
+reasoning_task     = "deepseek-r1"
+long_context_task  = "minimax-text-01"
+chinese_task       = "qwen-max"
+quick_task         = "doubao-pro-32k"
+creative_task      = "baichuan4-turbo"
+analysis_task      = "qwen2.5-72b"
+agent_task         = "claude-sonnet-4-6"
+offline_task       = "ollama/qwen2.5:7b"
+
+[claw_auto.fallback]
+chain = ["deepseek-v3", "qwen-plus", "doubao-pro-32k", "ollama/qwen2.5:7b"]
+fail_threshold = 3
+
+[claw_auto.budget]
+enabled                  = true
+max_cost_per_request_cny = 1.0
+prefer_cheapest_capable  = false
+daily_budget_alert_model = "doubao-pro-32k"

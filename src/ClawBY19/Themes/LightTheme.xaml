@@ -1,0 +1,20 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ══ Light 主题（浅色日间模式） ══ -->
+    <SolidColorBrush x:Key="BgDarkBrush">#FFF5F5F5</SolidColorBrush>
+    <SolidColorBrush x:Key="BgPanelBrush">#FFE8E8EE</SolidColorBrush>
+    <SolidColorBrush x:Key="BgCardBrush">#FFFFFFFF</SolidColorBrush>
+    <SolidColorBrush x:Key="AccentBlueBrush">#FF2563EB</SolidColorBrush>
+    <SolidColorBrush x:Key="AccentGreenBrush">#FF16A34A</SolidColorBrush>
+    <SolidColorBrush x:Key="AccentYellowBrush">#FFEA580C</SolidColorBrush>
+    <SolidColorBrush x:Key="TextPrimaryBrush">#FF1A1A2E</SolidColorBrush>
+    <SolidColorBrush x:Key="TextSecondaryBrush">#FF6B7280</SolidColorBrush>
+
+    <!-- 聊天消息角色颜色 -->
+    <SolidColorBrush x:Key="ChatUserBrush">#FF2563EB</SolidColorBrush>
+    <SolidColorBrush x:Key="ChatAssistantBrush">#FF1A1A2E</SolidColorBrush>
+    <SolidColorBrush x:Key="ChatSystemBrush">#FF9CA3AF</SolidColorBrush>
+    <SolidColorBrush x:Key="UserBubbleBgBrush">#FFDBEAFE</SolidColorBrush>
+
+</ResourceDictionary>

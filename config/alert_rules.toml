@@ -1,0 +1,30 @@
+# config/alert_rules.toml — 费用预警规则
+
+[daily]
+enabled             = true
+threshold_cny       = 20.0
+warning_at_percent  = 80
+critical_at_percent = 100
+
+[weekly]
+enabled             = true
+threshold_cny       = 100.0
+warning_at_percent  = 80
+critical_at_percent = 100
+
+[monthly]
+enabled             = true
+threshold_cny       = 500.0
+warning_at_percent  = 80
+critical_at_percent = 100
+
+[cumulative]
+enabled             = true
+threshold_cny       = 5000.0
+warning_at_percent  = 90
+critical_at_percent = 100
+
+[action]
+on_warning              = "flash_yellow"
+on_critical             = "flash_red_and_pause"
+auto_pause_on_critical  = true

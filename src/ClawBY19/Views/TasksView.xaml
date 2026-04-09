@@ -1,0 +1,607 @@
+<UserControl x:Class="ClawBY19.Views.TasksView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:ClawBY19.ViewModels"
+             Background="{DynamicResource BgDarkBrush}">
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- ── 标题 + 刷新 ── -->
+        <Grid Grid.Row="0" Margin="0,0,0,14">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="📋 任务" FontSize="20" FontWeight="Bold"
+                       Foreground="{DynamicResource AccentBlueBrush}" VerticalAlignment="Center"/>
+            <Button Grid.Column="1" Content="🔄 刷新" Style="{StaticResource NavButton}"
+                    Command="{Binding RefreshCommand}"/>
+        </Grid>
+
+        <!-- ── TabControl ── -->
+        <TabControl Grid.Row="1"
+                    SelectedIndex="{Binding SelectedTabIndex}"
+                    Background="{DynamicResource BgDarkBrush}"
+                    BorderBrush="{DynamicResource BgCardBrush}">
+
+            <TabControl.Resources>
+                <Style TargetType="TabItem">
+                    <Setter Property="Background" Value="{DynamicResource BgPanelBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                    <Setter Property="FontSize" Value="13"/>
+                    <Setter Property="Padding" Value="16,8"/>
+                    <Setter Property="BorderThickness" Value="0"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="TabItem">
+                                <Border x:Name="TabBorder" Background="{TemplateBinding Background}"
+                                        Padding="{TemplateBinding Padding}"
+                                        Margin="0,0,4,0" CornerRadius="6,6,0,0">
+                                    <ContentPresenter ContentSource="Header"
+                                                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter TargetName="TabBorder" Property="Background"
+                                                Value="{DynamicResource BgCardBrush}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource AccentBlueBrush}"/>
+                                    </Trigger>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="TabBorder" Property="Background"
+                                                Value="{DynamicResource BgCardBrush}"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+
+                <!-- DataGrid 公用样式 -->
+                <Style TargetType="DataGrid">
+                    <Setter Property="Background" Value="{DynamicResource BgDarkBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource BgCardBrush}"/>
+                    <Setter Property="BorderThickness" Value="0"/>
+                    <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+                    <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource BgCardBrush}"/>
+                    <Setter Property="RowBackground" Value="{DynamicResource BgDarkBrush}"/>
+                    <Setter Property="AlternatingRowBackground" Value="{DynamicResource BgPanelBrush}"/>
+                    <Setter Property="AutoGenerateColumns" Value="False"/>
+                    <Setter Property="CanUserAddRows" Value="False"/>
+                    <Setter Property="CanUserDeleteRows" Value="False"/>
+                    <Setter Property="IsReadOnly" Value="True"/>
+                    <Setter Property="SelectionMode" Value="Single"/>
+                    <Setter Property="FontSize" Value="13"/>
+                    <Setter Property="ColumnHeaderHeight" Value="36"/>
+                    <Setter Property="RowHeight" Value="34"/>
+                </Style>
+                <Style TargetType="DataGridColumnHeader">
+                    <Setter Property="Background" Value="{DynamicResource BgCardBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                    <Setter Property="FontSize" Value="12"/>
+                    <Setter Property="FontWeight" Value="SemiBold"/>
+                    <Setter Property="Padding" Value="10,0"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource BgPanelBrush}"/>
+                    <Setter Property="BorderThickness" Value="0,0,1,0"/>
+                </Style>
+                <Style TargetType="DataGridRow">
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="{DynamicResource BgCardBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="{DynamicResource BgCardBrush}"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+                <Style TargetType="DataGridCell">
+                    <Setter Property="Padding" Value="10,0"/>
+                    <Setter Property="BorderThickness" Value="0"/>
+                    <Setter Property="VerticalAlignment" Value="Center"/>
+                    <Style.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </TabControl.Resources>
+
+            <!-- ══ Tab1：操作记录（NEW） ══ -->
+            <TabItem Header="📤 操作记录">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- 过滤栏 -->
+                    <Border Grid.Row="0" Background="{DynamicResource BgCardBrush}"
+                            CornerRadius="6" Padding="10,8" Margin="0,0,0,8">
+                        <StackPanel Orientation="Horizontal">
+                            <!-- 类型过滤 -->
+                            <TextBlock Text="类型：" FontSize="12" VerticalAlignment="Center"
+                                       Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,6,0"/>
+                            <Button Content="全部" FontSize="12" Margin="0,0,4,0"
+                                    Command="{Binding SetTypeFilterCommand}" CommandParameter="全部">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource NavButton}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding TypeFilter}" Value="全部">
+                                                <Setter Property="Background" Value="{DynamicResource BgDarkBrush}"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource AccentBlueBrush}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                            <Button Content="📤 Git上传" FontSize="12" Margin="0,0,4,0"
+                                    Command="{Binding SetTypeFilterCommand}" CommandParameter="GitUpload">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource NavButton}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding TypeFilter}" Value="GitUpload">
+                                                <Setter Property="Background" Value="{DynamicResource BgDarkBrush}"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource AccentBlueBrush}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                            <Button Content="☁️ 云端部署" FontSize="12"
+                                    Command="{Binding SetTypeFilterCommand}" CommandParameter="CloudDeploy">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource NavButton}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding TypeFilter}" Value="CloudDeploy">
+                                                <Setter Property="Background" Value="{DynamicResource BgDarkBrush}"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource AccentBlueBrush}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+
+                            <Rectangle Width="1" Fill="{DynamicResource BgPanelBrush}" Margin="12,4"/>
+
+                            <!-- 状态过滤 -->
+                            <TextBlock Text="状态：" FontSize="12" VerticalAlignment="Center"
+                                       Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,6,0"/>
+                            <Button Content="全部" FontSize="12" Margin="0,0,4,0"
+                                    Command="{Binding SetStatusFilterCommand}" CommandParameter="全部">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource NavButton}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding StatusFilter}" Value="全部">
+                                                <Setter Property="Background" Value="{DynamicResource BgDarkBrush}"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource AccentBlueBrush}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                            <Button Content="✅ 成功" FontSize="12" Margin="0,0,4,0"
+                                    Command="{Binding SetStatusFilterCommand}" CommandParameter="success">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource NavButton}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding StatusFilter}" Value="success">
+                                                <Setter Property="Background" Value="{DynamicResource BgDarkBrush}"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource AccentGreenBrush}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                            <Button Content="❌ 失败" FontSize="12"
+                                    Command="{Binding SetStatusFilterCommand}" CommandParameter="failed">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource NavButton}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding StatusFilter}" Value="failed">
+                                                <Setter Property="Background" Value="{DynamicResource BgDarkBrush}"/>
+                                                <Setter Property="Foreground" Value="#FFFF6B6B"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- 任务列表 -->
+                    <DataGrid Grid.Row="1" x:Name="OperationsGrid"
+                              ItemsSource="{Binding OperationTasks}"
+                              MouseDoubleClick="OperationsGrid_MouseDoubleClick">
+                        <DataGrid.Columns>
+                            <!-- 类型 -->
+                            <DataGridTextColumn Header="类型" Width="90"
+                                                Binding="{Binding TypeLabel}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                        <Setter Property="Margin" Value="10,0"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource AccentBlueBrush}"/>
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <!-- 摘要 -->
+                            <DataGridTextColumn Header="摘要" Width="*" MinWidth="180"
+                                                Binding="{Binding Summary}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                        <Setter Property="Margin" Value="10,0"/>
+                                        <Setter Property="ToolTip" Value="{Binding Summary}"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <!-- 时间 -->
+                            <DataGridTextColumn Header="时间" Width="110"
+                                                Binding="{Binding StartedAt}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                        <Setter Property="Margin" Value="10,0"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                                        <Setter Property="FontFamily" Value="Consolas"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <!-- 耗时 -->
+                            <DataGridTextColumn Header="耗时" Width="70"
+                                                Binding="{Binding Duration}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                        <Setter Property="HorizontalAlignment" Value="Center"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <!-- 状态 -->
+                            <DataGridTemplateColumn Header="状态" Width="80">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate DataType="{x:Type vm:TaskRecordItem}">
+                                        <TextBlock Text="{Binding StatusIcon}"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"
+                                                   FontSize="16">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="{DynamicResource AccentGreenBrush}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsFailed}" Value="True">
+                                                            <Setter Property="Foreground" Value="#FFFF6B6B"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                                                            <Setter Property="Foreground" Value="{DynamicResource AccentYellowBrush}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <!-- ══ Tab2：正在执行 ══ -->
+            <TabItem Header="⚡ 运行中">
+                <DataGrid ItemsSource="{Binding RunningTasks}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="任务内容" Binding="{Binding TaskContent}" Width="*" MinWidth="200">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                    <Setter Property="Margin" Value="10,0"/>
+                                    <Setter Property="ToolTip" Value="{Binding TaskContent}"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="执行规则" Binding="{Binding ExecutionRule}" Width="160" MinWidth="100">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                    <Setter Property="Margin" Value="10,0"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="执行次数" Binding="{Binding ExecutedCount}" Width="100">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource AccentGreenBrush}"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+
+            <!-- ══ Tab3：学习日志 ══ -->
+            <TabItem Header="📚 学习记录">
+                <DataGrid ItemsSource="{Binding TaskLogs}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="任务内容" Binding="{Binding TaskContent}" Width="2*" MinWidth="150">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                    <Setter Property="Margin" Value="10,0"/>
+                                    <Setter Property="ToolTip" Value="{Binding TaskContent}"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="类型" Binding="{Binding ExecutionRule}" Width="120">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                    <Setter Property="Margin" Value="10,0"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="执行时间" Binding="{Binding ExecutionTime}" Width="140">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                    <Setter Property="Margin" Value="10,0"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTemplateColumn Header="结果" Width="3*" MinWidth="200">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate DataType="{x:Type vm:TaskLogItem}">
+                                    <TextBlock Text="{Binding ExecutionResult}"
+                                               Margin="10,0" VerticalAlignment="Center"
+                                               TextTrimming="CharacterEllipsis"
+                                               ToolTip="{Binding ExecutionResult}">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="{DynamicResource AccentGreenBrush}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsSuccess}" Value="False">
+                                                        <Setter Property="Foreground" Value="#FFFF6B6B"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+
+        </TabControl>
+
+        <!-- ══════ 任务详情弹窗覆盖层 ══════ -->
+        <Grid Grid.RowSpan="2"
+              Visibility="{Binding IsDetailOpen, Converter={StaticResource BoolToVis}}">
+            <Rectangle Fill="#BB000000"/>
+
+            <Border HorizontalAlignment="Center" VerticalAlignment="Center"
+                    Background="{DynamicResource BgCardBrush}" CornerRadius="12"
+                    Padding="32,24" MinWidth="620" MaxWidth="780" MaxHeight="720">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>  <!-- 标题行 -->
+                        <RowDefinition Height="Auto"/>  <!-- 字段区 -->
+                        <RowDefinition Height="Auto"/>  <!-- 分割线 -->
+                        <RowDefinition Height="*"/>     <!-- 步骤日志（可滚动） -->
+                        <RowDefinition Height="Auto"/>  <!-- AI 分析（失败时显示） -->
+                        <RowDefinition Height="Auto"/>  <!-- 操作按钮 -->
+                    </Grid.RowDefinitions>
+
+                    <!-- 标题 + 关闭 -->
+                    <Grid Grid.Row="0" Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Orientation="Horizontal">
+                            <TextBlock Text="{Binding SelectedTask.TypeIcon}" FontSize="20" Margin="0,0,8,0"
+                                       VerticalAlignment="Center"/>
+                            <TextBlock FontSize="16" FontWeight="Bold" VerticalAlignment="Center"
+                                       Foreground="{DynamicResource TextPrimaryBrush}">
+                                <Run Text="{Binding SelectedTask.TypeLabel, Mode=OneWay}"/>
+                                <Run Text=" · #"/>
+                                <Run Text="{Binding SelectedTask.TaskId, Mode=OneWay}"/>
+                            </TextBlock>
+                            <Border Margin="12,0,0,0" Padding="8,3" CornerRadius="4">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Background" Value="{DynamicResource AccentGreenBrush}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SelectedTask.IsFailed}" Value="True">
+                                                <Setter Property="Background" Value="#FFFF6B6B"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding SelectedTask.IsRunning}" Value="True">
+                                                <Setter Property="Background" Value="{DynamicResource AccentYellowBrush}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock Text="{Binding SelectedTask.StatusIcon}" FontSize="12"
+                                           Foreground="{DynamicResource BgDarkBrush}" FontWeight="SemiBold"/>
+                            </Border>
+                        </StackPanel>
+                        <Button Grid.Column="1" Content="✕" Style="{StaticResource NavButton}"
+                                FontSize="16" Command="{Binding CloseDetailCommand}"/>
+                    </Grid>
+
+                    <!-- 字段区域 -->
+                    <Grid Grid.Row="1" Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Row 0 -->
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="开始时间" FontSize="11"
+                                   Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="0,4"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SelectedTask.StartedAt}" FontSize="12"
+                                   Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" Margin="0,4"/>
+                        <TextBlock Grid.Row="0" Grid.Column="2" Text="耗时" FontSize="11"
+                                   Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="0,4"/>
+                        <TextBlock Grid.Row="0" Grid.Column="3" Text="{Binding SelectedTask.Duration}" FontSize="12"
+                                   Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" Margin="0,4"/>
+
+                        <!-- Row 1: Git 字段 -->
+                        <TextBlock Grid.Row="1" Grid.Column="0"
+                                   Visibility="{Binding SelectedTask.LocalPath, Converter={StaticResource StringToVis}}"
+                                   Text="本地路径" FontSize="11"
+                                   Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="0,4"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1"
+                                   Visibility="{Binding SelectedTask.LocalPath, Converter={StaticResource StringToVis}}"
+                                   Text="{Binding SelectedTask.LocalPath}" FontSize="11"
+                                   Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center"
+                                   TextTrimming="CharacterEllipsis"
+                                   ToolTip="{Binding SelectedTask.LocalPath}" Margin="0,4"/>
+                        <TextBlock Grid.Row="1" Grid.Column="2"
+                                   Visibility="{Binding SelectedTask.Branch, Converter={StaticResource StringToVis}}"
+                                   Text="分支" FontSize="11"
+                                   Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="0,4"/>
+                        <TextBlock Grid.Row="1" Grid.Column="3"
+                                   Visibility="{Binding SelectedTask.Branch, Converter={StaticResource StringToVis}}"
+                                   Text="{Binding SelectedTask.Branch}" FontSize="12"
+                                   Foreground="{DynamicResource AccentBlueBrush}" VerticalAlignment="Center" Margin="0,4"/>
+
+                        <!-- Row 2: 仓库/服务器 -->
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="仓库/服务器" FontSize="11"
+                                   Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="0,4"/>
+                        <TextBlock Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3"
+                                   FontSize="11" Foreground="{DynamicResource TextPrimaryBrush}"
+                                   TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="0,4">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Text" Value="{Binding SelectedTask.RemoteUrl}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedTask.RemoteUrl}" Value="{x:Null}">
+                                            <Setter Property="Text" Value="{Binding SelectedTask.ServerIp}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
+
+                    <!-- 分割线 -->
+                    <Rectangle Grid.Row="2" Height="1" Fill="{DynamicResource BgPanelBrush}" Margin="0,0,0,10"/>
+
+                    <!-- 步骤日志 -->
+                    <ScrollViewer Grid.Row="3" MaxHeight="240"
+                                  VerticalScrollBarVisibility="Auto"
+                                  Margin="0,0,0,10">
+                        <StackPanel>
+                            <TextBlock Text="执行步骤" FontSize="12" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,8"/>
+                            <ItemsControl ItemsSource="{Binding SelectedTask.Steps}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type vm:StepLogDisplay}">
+                                        <Grid Margin="0,2">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="22"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="{Binding Icon}" FontSize="11"
+                                                       VerticalAlignment="Top"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding Text}"
+                                                       FontSize="11" TextWrapping="Wrap"
+                                                       FontFamily="Consolas">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="{DynamicResource AccentGreenBrush}"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Success}" Value="False">
+                                                                <Setter Property="Foreground" Value="#FFFF6B6B"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!-- AI 分析区（失败时显示） -->
+                    <StackPanel Grid.Row="4" Margin="0,0,0,12"
+                                Visibility="{Binding SelectedTask.IsFailed, Converter={StaticResource BoolToVis}}">
+                        <Rectangle Height="1" Fill="{DynamicResource BgPanelBrush}" Margin="0,0,0,10"/>
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="🤖 AI 失败分析" FontSize="12" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource AccentYellowBrush}" VerticalAlignment="Center"/>
+                            <Button Grid.Column="1" Margin="0,0,6,0"
+                                    FontSize="11"
+                                    Command="{Binding AnalyzeFailureCommand}"
+                                    IsEnabled="{Binding IsAnalyzing, Converter={StaticResource InvertBool}}">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource NavButton}">
+                                        <Setter Property="Content" Value="🔍 AI分析原因"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsAnalyzing}" Value="True">
+                                                <Setter Property="Content" Value="分析中..."/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                            <Button Grid.Column="2"
+                                    Content="📌 标记失败方案" Style="{StaticResource NavButton}" FontSize="11"
+                                    Command="{Binding MarkFailedPathCommand}"
+                                    Visibility="{Binding DetailAiAnalysis, Converter={StaticResource StringToVis}}"/>
+                        </Grid>
+                        <Border Background="{DynamicResource BgDarkBrush}" CornerRadius="6" Padding="12,10"
+                                Visibility="{Binding DetailAiAnalysis, Converter={StaticResource StringToVis}}">
+                            <ScrollViewer MaxHeight="150" VerticalScrollBarVisibility="Auto">
+                                <TextBlock Text="{Binding DetailAiAnalysis}" FontSize="12"
+                                           TextWrapping="Wrap" LineHeight="20"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            </ScrollViewer>
+                        </Border>
+                    </StackPanel>
+
+                    <!-- 底部关闭按钮 -->
+                    <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="✕ 关闭" Style="{StaticResource NavButton}"
+                                Command="{Binding CloseDetailCommand}"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+
+    </Grid>
+</UserControl>
